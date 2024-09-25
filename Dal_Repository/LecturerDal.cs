@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Dal_Repository.Model;
 using DTO;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +13,7 @@ namespace Dal_Repository
 {
     public class LecturerDal : IDAL.ILecturerDal
     {
-        public bool Add(LecturerDTO item)
+        public async Task<bool> AddAsync(LecturerDTO item)
         {
             try
             {
@@ -23,8 +24,8 @@ namespace Dal_Repository
                    .ReverseMap()
                    );
                 Lecturer u = Mapper.Map<Lecturer>(item);
-                ctx.Add(u);
-                ctx.SaveChanges();
+               await ctx.AddAsync(u);
+               await ctx.SaveChangesAsync();
                 return true;
             }
             catch
@@ -33,14 +34,14 @@ namespace Dal_Repository
             }
         }
 
-        public bool Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             try
             {
                 using Model.LearningPlatformContext ctx = new();
                 Lecturer l = ctx.Lecturers.Find(id);
                 ctx.Lecturers.Remove(l);
-                ctx.SaveChanges();
+                await  ctx.SaveChangesAsync();
                 return true;
             }
             catch
@@ -49,20 +50,15 @@ namespace Dal_Repository
             }
         }
 
-        public LecturerDTO Get(int id)
+        public async Task<LecturerDTO> GetAsync(int id)
         {
             try
             {
-                using Model.LearningPlatformContext ctx = new();
-                Mapper.Initialize(
-                    cnf =>
-                    cnf.CreateMap<Lecturer, LecturerDTO>()
-                    .ReverseMap()
-                    );
-                LecturerDTO u = Mapper.Map<LecturerDTO>(ctx.Lecturers.Find(id));
-                return u;
-                //object user = ctx.Users.Find(id);
-                //return user;
+                using var ctx = new Model.LearningPlatformContext();
+                var config = new MapperConfiguration(cfg => cfg.CreateMap<Lecturer, LecturerDTO>().ReverseMap());
+                var mapper = config.CreateMapper();
+                var lecturer = await ctx.Lecturers.FindAsync(id);
+                return mapper.Map<LecturerDTO>(lecturer);
             }
             catch
             {
@@ -70,17 +66,27 @@ namespace Dal_Repository
             }
         }
 
-        public List<LecturerDTO> GetAll(Func<LecturerDTO, bool>? condition = null)
+        public async Task<List<LecturerDTO>> GetAllAsync(Func<LecturerDTO, bool>? condition = null)
         {
             try
             {
-                using Model.LearningPlatformContext ctx = new();
-                Mapper.Initialize(
-                    cnf =>
-                    cnf.CreateMap<Lecturer, LecturerDTO>()
-                    .ReverseMap()
-                    );
-                return ctx.Lecturers.Select(u => Mapper.Map<LecturerDTO>(u)).ToList();
+                using var ctx = new Model.LearningPlatformContext();
+
+                // אתחול המיפוי של AutoMapper
+                var config = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<Lecturer, LecturerDTO>().ReverseMap();
+                });
+                var mapper = config.CreateMapper();
+
+                // קבלת כל המשתמשים מהמסד נתונים בצורה אסינכרונית
+                var lecturers = await ctx.Lecturers.ToListAsync();
+
+                // המרת הנתונים ל-UserDTO בצורה אסינכרונית
+                var lecturerDtos = lecturers.Select(l => mapper.Map<LecturerDTO>(l)).ToList();
+
+                // אם יש תנאי מסנן, ניישם אותו על רשימת ה-DTO
+                return condition == null ? lecturerDtos : lecturerDtos.Where(condition).ToList();
             }
             catch
             {
@@ -88,7 +94,7 @@ namespace Dal_Repository
             }
         }
 
-        public bool Update(LecturerDTO item)
+        public async Task<bool> UpdateAsync(LecturerDTO item)
         {
             try
             {
@@ -100,7 +106,7 @@ namespace Dal_Repository
                    );
                 Lecturer u = Mapper.Map<Lecturer>(item);
                 ctx.Lecturers.Update(u);
-                int changes = ctx.SaveChanges(); 
+                int changes = await ctx.SaveChangesAsync(); 
                 return changes > 0;
             }
             catch

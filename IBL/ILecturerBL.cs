@@ -9,10 +9,10 @@ namespace IBL
 {
     public interface ILecturerBL
     {
-        public LecturerDTO Get(int id);
-        public List<LecturerDTO> GetAll(Func<LecturerDTO, bool>? condition = null);
-        public bool Add(LecturerDTO item);
-        public bool Update(LecturerDTO item);
-        public bool Delete(int id);
+        public Task<LecturerDTO> GetAsync(int id);
+        public Task<List<LecturerDTO>> GetAllAsync(Func<LecturerDTO, bool>? condition = null);
+        public Task<bool> AddAsync(LecturerDTO item);
+        public Task<bool> UpdateAsync(LecturerDTO item);
+        public Task<bool> DeleteAsync(int id);
     }
 }

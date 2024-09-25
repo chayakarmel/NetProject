@@ -9,10 +9,10 @@ namespace IBL
 {
     public interface ILearningModeBl
     {
-        public LearningModeDTO Get(int id);
-        public List<LearningModeDTO> GetAll(Func<LearningModeDTO, bool>? condition = null);
-        public bool Add(LearningModeDTO item);
-        public bool Update(LearningModeDTO item);
-        public bool Delete(int id);
+        public Task<LearningModeDTO> GetAsync(int id);
+        public Task<List<LearningModeDTO>> GetAllAsync(Func<LearningModeDTO, bool>? condition = null);
+        public Task<bool> AddAsync(LearningModeDTO item);
+        public Task<bool> UpdateAsync(LearningModeDTO item);
+        public Task<bool> DeleteAsync(int id);
     }
 }

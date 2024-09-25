@@ -1,4 +1,5 @@
 ﻿using DTO;
+using IBL;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -21,36 +22,45 @@ namespace WebApi.Controllers
        
         // GET: api/<LearningModeController>
         [HttpGet]
-        public IEnumerable<LearningModeDTO> Get()
+        public async Task<IEnumerable<LearningModeDTO>> GetAsync()
         {
-            return IlearningModeBl.GetAll();
+            return await IlearningModeBl.GetAllAsync();
         }
+
         // GET api/<LearningModeController>/5
         [HttpGet("{id}")]
-        public LearningModeDTO Get(int id)
+        public async Task<LearningModeDTO> Get(int id)
         {
-            return IlearningModeBl.Get(id);
+            return await IlearningModeBl.GetAsync(id);
+
         }
 
         // POST api/<LearningModeController>
         [HttpPost]
-        public void Post(LearningModeDTO value)
+        public async Task<IActionResult> Post([FromBody] LearningModeDTO value)
         {
-            IlearningModeBl.Add(value);
+            var success = await IlearningModeBl.AddAsync(value);
+            return success ? Ok() : BadRequest();
         }
 
         // PUT api/<LearningModeController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] LearningModeDTO value)
+        public async Task<IActionResult> Put(int id, [FromBody] LearningModeDTO learningMode)
         {
-            IlearningModeBl.Update(value);
-        }
+            if (id != learningMode.ModeId)
+            {
+                return BadRequest();
+            }
 
+            var success = await IlearningModeBl.UpdateAsync(learningMode);
+            return success ? Ok() : NotFound();
+        }
         // DELETE api/<LearningModeController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            IlearningModeBl.Delete(id);
+            var success = await IlearningModeBl.DeleteAsync(id);
+            return success ? Ok() : NotFound();
         }
     }
 }

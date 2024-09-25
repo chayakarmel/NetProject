@@ -1,4 +1,4 @@
-﻿
+﻿ 
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,12 +8,13 @@ using AutoMapper;
 using Dal_Repository.Model;
 using DTO;
 using IDAL;
+using Microsoft.EntityFrameworkCore;
 
 namespace Dal_Repository
 {
     public class LearningModeDal : IDAL.ILearningModeDal
     {
-        public bool Add(LearningModeDTO item)
+        public async Task<bool> AddAsync(LearningModeDTO item)
         {
             try
             {
@@ -24,8 +25,8 @@ namespace Dal_Repository
                    .ReverseMap()
                    );
                 LearningMode u = Mapper.Map<LearningMode>(item);
-                ctx.Add(u);
-                ctx.SaveChanges();
+               await ctx.AddAsync(u);
+               await ctx.SaveChangesAsync();
                 return true;
             }
             catch
@@ -36,14 +37,14 @@ namespace Dal_Repository
 
        
 
-        public bool Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             try
             {
                 using Model.LearningPlatformContext ctx = new();
-                LearningMode user = ctx.LearningModes.Find(id);
-                ctx.LearningModes.Remove(user);
-                ctx.SaveChanges();
+                LearningMode learning = ctx.LearningModes.Find(id);
+                ctx.LearningModes.Remove(learning);
+               await ctx.SaveChangesAsync();
                 return true;
             }
             catch
@@ -52,20 +53,15 @@ namespace Dal_Repository
             }
         }
 
-        public LearningModeDTO Get(int id)
+        public async Task<LearningModeDTO> GetAsync(int id)
         {
             try
             {
-                using Model.LearningPlatformContext ctx = new();
-                Mapper.Initialize(
-                    cnf =>
-                    cnf.CreateMap<LearningMode, LearningModeDTO>()
-                    .ReverseMap()
-                    );
-                LearningModeDTO u = Mapper.Map<LearningModeDTO>(ctx.LearningModes.Find(id));
-                return u;
-                //object user = ctx.Users.Find(id);
-                //return user;
+                using var ctx = new Model.LearningPlatformContext();
+                var config = new MapperConfiguration(cfg => cfg.CreateMap<LearningMode, LearningModeDTO>().ReverseMap());
+                var mapper = config.CreateMapper();
+                var learning = await ctx.LearningModes.FindAsync(id);
+                return mapper.Map<LearningModeDTO>(learning);
             }
             catch
             {
@@ -73,17 +69,20 @@ namespace Dal_Repository
             }
         }
 
-        public List<LearningModeDTO> GetAll(Func<LearningModeDTO, bool>? condition = null)
+        public async Task<List<LearningModeDTO>> GetAllAsync(Func<LearningModeDTO, bool>? condition = null)
         {
+
             try
             {
-                using Model.LearningPlatformContext ctx = new();
-                Mapper.Initialize(
-                    cnf =>
-                    cnf.CreateMap<LearningMode, LearningModeDTO>()
-                    .ReverseMap()
-                    );
-                return ctx.LearningModes.Select(u => Mapper.Map<LearningModeDTO>(u)).ToList();
+                using var ctx = new Model.LearningPlatformContext();
+                var config = new MapperConfiguration(cfg =>
+                {
+                    cfg.CreateMap<LearningMode, LearningModeDTO>().ReverseMap();
+                });
+                var mapper = config.CreateMapper();
+                var learnings = await ctx.LearningModes.ToListAsync();
+                var learningDtos = learnings.Select(u => mapper.Map<LearningModeDTO>(u)).ToList();
+                return condition == null ? learningDtos : learningDtos.Where(condition).ToList();
             }
             catch
             {
@@ -92,7 +91,7 @@ namespace Dal_Repository
         }
 
       
-        public bool Update(LearningModeDTO item)
+        public async Task<bool> UpdateAsync(LearningModeDTO item)
         {
             try
             {
@@ -102,9 +101,9 @@ namespace Dal_Repository
                    cnf.CreateMap<LearningMode, LearningModeDTO>()
                    .ReverseMap()
                    );
-                LearningMode u = Mapper.Map<LearningMode>(item);
-                ctx.LearningModes.Update(u);
-                int changes = ctx.SaveChanges();
+                LearningMode l = Mapper.Map<LearningMode>(item);
+                ctx.LearningModes.Update(l);
+                int changes = await ctx.SaveChangesAsync();
                 return changes > 0;
             }
             catch

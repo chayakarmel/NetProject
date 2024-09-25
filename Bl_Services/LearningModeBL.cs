@@ -4,73 +4,73 @@ using IDAL;
 
 namespace Bl_Services
 {
-    public class LearningModeBL:ILearningModeBl
+    public class LearningModeBL : ILearningModeBl
     {
-            private readonly IDAL.ILearningModeDal ILearningModeDal;
+        private readonly IDAL.ILearningModeDal ILearningModeDal;
 
-            public LearningModeBL(ILearningModeDal _ILearningModeDal)
+        public LearningModeBL(ILearningModeDal _ILearningModeDal)
+        {
+            ILearningModeDal = _ILearningModeDal;
+        }
+
+        public async Task<bool> AddAsync(LearningModeDTO item)
+        {
+            try
             {
-                ILearningModeDal = _ILearningModeDal;
+                return await ILearningModeDal.AddAsync(item);
+            }
+            catch
+            {
+                return false;
             }
 
-            public bool Add(LearningModeDTO item)
-            {
-                try
-                {
-                    return ILearningModeDal.Add(item);
-                }
-                catch
-                {
-                    return false;
-                }
+        }
 
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            try
+            {
+                return await ILearningModeDal.DeleteAsync(id);
+            }
+            catch
+            {
+                return false;
             }
 
+        }
 
-            public bool Delete(int id)
+        public async Task<LearningModeDTO> GetAsync(int id)
+        {
+            try
             {
-                try
-                {
-                    return ILearningModeDal.Delete(id);
-                }
-                catch
-                {
-                    return false;
-                }
-
+                return await ILearningModeDal.GetAsync(id);
+            }
+            catch
+            {
+                return null;
             }
 
-            public LearningModeDTO Get(int id)
+        }
+        async Task<List<LearningModeDTO>> ILearningModeBl.GetAllAsync(Func<LearningModeDTO, bool>? condition)
+        {
+            try
             {
-                try
-                {
-                    return ILearningModeDal.Get(id);
-                }
-                catch
-                {
-                    return null;
-                }
-
+                return await ILearningModeDal.GetAllAsync();
             }
-        List<LearningModeDTO> ILearningModeBl.GetAll(Func<LearningModeDTO, bool>? condition)
+            catch
             {
-                try
-                {
-                    return ILearningModeDal.GetAll();
-                }
-                catch
-                {
-                    return null;
-                }
+                return null;
             }
+        }
 
 
-        public bool Update(LearningModeDTO user)
-            {
-                return ILearningModeDal.Update(user);
-            }
+        public async Task<bool> UpdateAsync(LearningModeDTO learningMode)
+        {
+            return await ILearningModeDal.UpdateAsync(learningMode);
+        }
 
-       
+
     }
 }
 

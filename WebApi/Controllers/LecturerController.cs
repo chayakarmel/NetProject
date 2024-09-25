@@ -1,5 +1,8 @@
 ﻿
+using Bl_Services;
+using Dal_Repository.Model;
 using DTO;
+using IBL;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -21,16 +24,16 @@ namespace WebApi.Controllers
         // GET: api/<UsersController>
         [HttpGet]
         //
-        public IEnumerable<LecturerDTO> Get()
+        public async Task<IEnumerable<LecturerDTO>> Get()
         {
-            return ILecturerBL.GetAll();
+            return await ILecturerBL.GetAllAsync();
         }
 
         // GET api/<UsersController>/5
         [HttpGet("{id}")]
-        public LecturerDTO Get(int id)
+        public async Task<LecturerDTO> Get(int id)
         {
-            return ILecturerBL.Get(id);
+            return await ILecturerBL.GetAsync(id);
 
         }
 
@@ -43,23 +46,35 @@ namespace WebApi.Controllers
 
         // POST api/<UsersController>
         [HttpPost]
-        public void Post([FromBody] LecturerDTO value)
+        public async Task<IActionResult> Post([FromBody] LecturerDTO value)
         {
-            ILecturerBL.Add(value);
+            var success = await ILecturerBL.AddAsync(value);
+            return success ? Ok() : BadRequest();
         }
+
+
+
 
         // PUT api/<UsersController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] LecturerDTO user)
+        public async Task<IActionResult> Put(int id, [FromBody] LecturerDTO lecturer)
         {
-            ILecturerBL.Update(user);
+            if (id != lecturer.LecturerId)
+            {
+                return BadRequest();
+            }
+
+            var success = await ILecturerBL.UpdateAsync(lecturer);
+            return success ? Ok() : NotFound();
         }
+
 
         // DELETE api/<UsersController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            ILecturerBL.Delete(id);
+            var success = await ILecturerBL.DeleteAsync(id);
+            return success ? Ok() : NotFound();
         }
     }
 }

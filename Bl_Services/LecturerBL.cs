@@ -18,11 +18,11 @@ namespace Bl_Services
             ILecturerDal = _ILecturerDal;
         }
 
-        public bool Add(LecturerDTO item)
+        public async Task<bool> AddAsync(LecturerDTO item)
         {
             try
             {
-                return ILecturerDal.Add(item);
+                return await ILecturerDal.AddAsync(item);
             }
             catch
             {
@@ -32,11 +32,11 @@ namespace Bl_Services
         }
 
 
-        public bool Delete(int id)
+        public async Task<bool> DeleteAsync(int id)
         {
             try
             {
-                return ILecturerDal.Delete(id);
+                return await ILecturerDal.DeleteAsync(id);
             }
             catch
             {
@@ -45,11 +45,11 @@ namespace Bl_Services
 
         }
 
-        public LecturerDTO Get(int id)
+        public async Task<LecturerDTO> GetAsync(int id)
         {
             try
             {
-                return ILecturerDal.Get(id);
+                return await ILecturerDal.GetAsync(id);
             }
             catch
             {
@@ -57,11 +57,11 @@ namespace Bl_Services
             }
 
         }
-        List<LecturerDTO> ILecturerBL.GetAll(Func<LecturerDTO, bool>? condition)
+        async Task<List<LecturerDTO>> ILecturerBL.GetAllAsync(Func<LecturerDTO, bool>? condition)
         {
             try
             {
-                return ILecturerDal.GetAll();
+                return await ILecturerDal.GetAllAsync();
             }
             catch
             {
@@ -71,9 +71,9 @@ namespace Bl_Services
 
 
 
-        public bool Update(LecturerDTO lecturer)
+        public async Task<bool> UpdateAsync(LecturerDTO lecturer)
         {
-            return ILecturerDal.Update(lecturer);
+            return await ILecturerDal.UpdateAsync(lecturer);
         }
 
     }
